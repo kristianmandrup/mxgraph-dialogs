@@ -1,0 +1,33 @@
+{
+  "name": "@mxgraph-app/dialogs",
+  "version": "0.0.1",
+  "description": "mxgraph app dialogs",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "repository": "",
+  "author": "Kristian Mandrup <kmandrup@gmail.com>",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "jscolor": "^0.3.0"
+  },
+  "peerDependencies": {
+    "@mxgraph-app/mx": "0.0.1",
+    "@mxgraph-app/resources": "0.0.1",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^7.10.1",
+    "@mxgraph-app/mx": "*",
+    "@mxgraph-app/resources": "*"
+  },
+  "scripts": {
+    "start": "tsc -w --preserveWatchOutput"
+  }
+}
