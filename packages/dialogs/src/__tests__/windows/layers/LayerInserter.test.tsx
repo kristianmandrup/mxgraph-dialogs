@@ -1,6 +1,6 @@
-import { LayerInserter, LayersWindow } from "../../../../dialogs";
+import { LayerInserter, LayersWindow } from "../../../windows";
 
-import { editorUi } from "../../../mocks";
+import { editorUi } from "../../mocks";
 
 describe("LayerInserter", () => {
   const ui = editorUi;

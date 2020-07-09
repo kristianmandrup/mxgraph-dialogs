@@ -1,4 +1,4 @@
-import { BaseDialogControl } from "../dialogs/base";
+import { BaseDialogControl } from "../";
 
 export class BasePrintDialogControl extends BaseDialogControl {
   td: any;

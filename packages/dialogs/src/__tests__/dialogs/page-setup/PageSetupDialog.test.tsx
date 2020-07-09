@@ -1,6 +1,6 @@
-import { PageSetupDialog } from "../..";
+import { PageSetupDialog } from "../../..";
 
-import { editorUi } from "../mocks";
+import { editorUi } from "../../mocks";
 
 describe("PageSetupDialog", () => {
   const ui = editorUi;

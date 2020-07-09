@@ -1,5 +1,4 @@
-import { AboutDialog } from "../../../dialogs";
-
+import { AboutDialog } from "../../../";
 import { editorUi } from "../../mocks";
 
 describe("AboutDialog", () => {

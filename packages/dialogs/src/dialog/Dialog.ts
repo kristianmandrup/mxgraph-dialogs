@@ -28,13 +28,13 @@ export class Dialog {
   static backdropColor = "white";
 
   documentMode: any;
-  bg: any;
+  background: any;
   dialogImg: any;
   onDialogClose: any;
   container: any;
   onResize: any;
   noScroll: any;
-  elt: any;
+  element: any;
   editorUi: any;
 
   w0: any;

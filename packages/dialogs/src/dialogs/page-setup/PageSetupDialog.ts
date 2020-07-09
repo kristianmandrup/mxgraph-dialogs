@@ -1,5 +1,5 @@
 import mx from "@mxgraph-app/mx";
-import { Dialog } from "../dialog/Dialog";
+import { Dialog } from "../../dialog/Dialog";
 import { ChangePageSetup } from "./ChangePageSetup";
 const { mxRectangle, mxEvent, mxUtils, mxResources, mxConstants } = mx;
 
