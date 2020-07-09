@@ -1,5 +1,7 @@
 import mx from "@mxgraph-app/mx";
 import resources from "@mxgraph-app/resources";
+import { DialogResizer } from "./resize";
+import { DialogInit } from "./init";
 
 type DialogOpts = {
   w?;
@@ -13,15 +15,7 @@ type DialogOpts = {
   ignoreBgClick?;
 };
 
-const {
-  mxEventObject,
-  mxEvent,
-  mxResources,
-  mxDivResizer,
-  mxUtils,
-  mxClient,
-  mxPopupMenu,
-} = mx;
+const { mxClient, mxPopupMenu } = mx;
 const { IMAGE_PATH } = resources;
 
 /**
@@ -54,9 +48,7 @@ export class Dialog {
   h: any;
   div: any;
 
-  getPosition(_left, _top, _w, _h): any {
-    return {};
-  }
+  dialogResizer?: DialogResizer;
 
   /**
    *
@@ -103,201 +95,30 @@ export class Dialog {
    */
   bgOpacity = 80;
 
-  constructor(editorUi, elt, opts: DialogOpts = {}) {
-    let {
-      w,
-      h,
-      modal,
-      closable,
-      onClose,
-      noScroll,
-      transparent,
-      // onResize,
-      ignoreBgClick,
-    } = opts;
-    var dx = 0;
+  constructor(ui, element, opts: DialogOpts = {}) {
+    this.initialize({ ui, element, ...opts });
+    this.init();
+  }
 
-    if (
-      mxClient.IS_VML &&
-      (this.documentMode == null || this.documentMode < 8)
-    ) {
-      // Adds padding as a workaround for box model in older IE versions
-      // This needs to match the total padding of geDialog in CSS
-      dx = 80;
-    }
+  getPosition(_left, _top, _w, _h): any {
+    return {};
+  }
 
-    w += dx;
-    h += dx;
+  initialize(opts) {
+    this.createDialogInit(opts).init();
+  }
 
-    // var w0 = w;
-    // var h0 = h;
+  createDialogInit(opts) {
+    return new DialogInit(this, opts);
+  }
 
-    var ds = mxUtils.getDocumentSize();
+  init() {}
 
-    // Workaround for print dialog offset in viewer lightbox
-    if (window.innerHeight != null) {
-      ds.height = window.innerHeight;
-    }
-
-    var dh = ds.height;
-    var left = Math.max(1, Math.round((ds.width - w - 64) / 2));
-    var top = Math.max(1, Math.round((dh - h - editorUi.footerHeight) / 3));
-
-    // Keeps window size inside available space
-    if (!mxClient.IS_QUIRKS) {
-      elt.style.maxHeight = "100%";
-    }
-
-    w = document.body != null ? Math.min(w, document.body.scrollWidth - 64) : w;
-    h = Math.min(h, dh - 64);
-
-    // Increments zIndex to put subdialogs and background over existing dialogs and background
-    if (editorUi.dialogs.length > 0) {
-      this.zIndex += editorUi.dialogs.length * 2;
-    }
-
-    if (this.bg == null) {
-      this.bg = editorUi.createDiv("background");
-      this.bg.style.position = "absolute";
-      this.bg.style.background = Dialog.backdropColor;
-      this.bg.style.height = dh + "px";
-      this.bg.style.right = "0px";
-      this.bg.style.zIndex = this.zIndex - 2;
-
-      mxUtils.setOpacity(this.bg, this.bgOpacity);
-
-      if (mxClient.IS_QUIRKS) {
-        new mxDivResizer(this.bg, null);
-      }
-    }
-
-    var origin = mxUtils.getDocumentScrollOrigin(document);
-    this.bg.style.left = origin.x + "px";
-    this.bg.style.top = origin.y + "px";
-    left += origin.x;
-    top += origin.y;
-
-    if (modal) {
-      document.body.appendChild(this.bg);
-    }
-
-    var div = editorUi.createDiv(transparent ? "geTransDialog" : "geDialog");
-    var pos = this.getPosition(left, top, w, h);
-    left = pos.x;
-    top = pos.y;
-
-    div.style.width = w + "px";
-    div.style.height = h + "px";
-    div.style.left = left + "px";
-    div.style.top = top + "px";
-    div.style.zIndex = this.zIndex;
-
-    div.appendChild(elt);
-    document.body.appendChild(div);
-
-    // Adds vertical scrollbars if needed
-    if (!noScroll && elt.clientHeight > div.clientHeight - 64) {
-      elt.style.overflowY = "auto";
-    }
-
-    if (closable) {
-      var img = document.createElement("img");
-
-      img.setAttribute("src", Dialog.prototype.closeImage);
-      img.setAttribute("title", mxResources.get("close"));
-      img.className = "geDialogClose";
-      img.style.top = top + 14 + "px";
-      img.style.left = left + w + 38 - dx + "px";
-      img.style.zIndex = this.zIndex;
-
-      mxEvent.addListener(img, "click", () => {
-        editorUi.hideDialog(true);
-      });
-
-      document.body.appendChild(img);
-      this.dialogImg = img;
-
-      if (!ignoreBgClick) {
-        var mouseDownSeen = false;
-
-        mxEvent.addGestureListeners(
-          this.bg,
-          (_evt) => {
-            mouseDownSeen = true;
-          },
-          undefined,
-          undefined
-        ),
-          null,
-          (_evt) => {
-            if (mouseDownSeen) {
-              editorUi.hideDialog(true);
-              mouseDownSeen = false;
-            }
-          };
-      }
-    }
-
-    mxEvent.addListener(window, "resize", this.resizeListener);
-
-    this.onDialogClose = onClose;
-    this.container = div;
-
-    editorUi.editor.fireEvent(new mxEventObject("showDialog"));
+  createDialogResizer() {
+    return new DialogResizer(this);
   }
 
   resizeListener() {
-    let {
-      editorUi,
-      onResize,
-      w0,
-      h0,
-      dh,
-      dx,
-      left,
-      top,
-      w,
-      h,
-      div,
-      noScroll,
-      elt,
-    } = this;
-    if (onResize) {
-      var newWH = onResize();
-
-      if (newWH) {
-        w0 = w = newWH.w;
-        h0 = h = newWH.h;
-      }
-    }
-
-    var ds = mxUtils.getDocumentSize();
-    dh = ds.height;
-    this.bg.style.height = dh + "px";
-
-    left = Math.max(1, Math.round((ds.width - w - 64) / 2));
-    top = Math.max(1, Math.round((dh - h - editorUi.footerHeight) / 3));
-    w =
-      document.body != null ? Math.min(w0, document.body.scrollWidth - 64) : w0;
-    h = Math.min(h0, dh - 64);
-
-    var pos = this.getPosition(left, top, w, h);
-    left = pos.x;
-    top = pos.y;
-
-    div.style.left = left + "px";
-    div.style.top = top + "px";
-    div.style.width = w + "px";
-    div.style.height = h + "px";
-
-    // Adds vertical scrollbars if needed
-    if (!noScroll && elt.clientHeight > div.clientHeight - 64) {
-      elt.style.overflowY = "auto";
-    }
-
-    if (this.dialogImg) {
-      this.dialogImg.style.top = top + 14 + "px";
-      this.dialogImg.style.left = left + w + 38 - dx + "px";
-    }
+    this.dialogResizer && this.dialogResizer.resizeListener();
   }
 }
